@@ -21,11 +21,16 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.skypoufy.amulets.init.AmuletsItem;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Mod(Amulets.MOD_ID)
 public class Amulets
 {
     public static final String MOD_ID = "amulets";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+    public static List<String> mods = new ArrayList<>();
 
     public Amulets()
     {

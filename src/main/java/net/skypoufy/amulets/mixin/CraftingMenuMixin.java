@@ -12,8 +12,9 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.skypoufy.amulets.Amulets;
 import net.skypoufy.amulets.cca.Slot;
-import net.skypoufy.amulets.init.AmuletsItem;
+import net.skypoufy.amulets.item.AmuletBaseItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(CraftingMenu.class)
 public abstract class CraftingMenuMixin {
@@ -39,23 +41,28 @@ public abstract class CraftingMenuMixin {
                 stacks.add(stack);
             }
 
-            boolean hasItem = stacks.stream().anyMatch(itemStack -> itemStack.is(AmuletsItem.AMULET.get()));
+            AtomicBoolean hasItem = new AtomicBoolean(false);
+            List<String> mods = new ArrayList<>(List.of());
 
-            if (!hasItem) {
-                RecipeManager manager = world.getRecipeManager();
-                Optional<CraftingRecipe> recipeOpt = manager.getRecipeFor(RecipeType.CRAFTING, container, world);
-
-                if (recipeOpt.isEmpty())
-                    return;
-
-                ResourceLocation id = recipeOpt.get().getId();
-
-                if ("create".equals(id.getNamespace())) {
-
-                    result.setItem(0, ItemStack.EMPTY);
-
-                    ci.cancel();
+            stacks.stream().forEach(item -> {
+                if (item.getItem() instanceof AmuletBaseItem stack) {
+                    hasItem.set(true);
+                    mods.add(stack.getAllowedMod());
                 }
+            });
+
+
+            RecipeManager manager = world.getRecipeManager();
+            Optional<CraftingRecipe> recipeOpt = manager.getRecipeFor(RecipeType.CRAFTING, container, world);
+
+            if (recipeOpt.isEmpty()) return;
+
+            ResourceLocation id = recipeOpt.get().getId();
+
+            if (Amulets.mods.contains(id.getNamespace()) && !mods.contains(id.getNamespace())) {
+                result.setItem(0, ItemStack.EMPTY);
+
+                ci.cancel();
             }
         });
     }
