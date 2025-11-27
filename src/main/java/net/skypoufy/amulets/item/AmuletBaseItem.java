@@ -15,21 +15,21 @@ public class AmuletBaseItem extends Item {
 
     protected String allowedMod;
 
-    public AmuletBaseItem(Properties settings) {
+    public AmuletBaseItem(Properties settings, String allowedMod) {
         super(settings);
-        addModToModList();
-    }
-
-    public AmuletBaseItem addModToModList() {
-        if (!Amulets.mods.contains(allowedMod)) {
-            Amulets.mods.add(allowedMod);
-        }
-        return this;
-    }
-
-    public AmuletBaseItem setAllowedMod(String allowedMod) {
         this.allowedMod = allowedMod;
-        return this;
+        this.addModToModList();
+    }
+
+    public void addModToModList() {
+        if (!Amulets.mods.contains(this.allowedMod)) {
+            Amulets.mods.add(this.allowedMod);
+        }
+    }
+
+    public void setAllowedMod(String allowedMod) {
+        this.allowedMod = allowedMod;
+        this.addModToModList();
     };
 
     public String getAllowedMod() {

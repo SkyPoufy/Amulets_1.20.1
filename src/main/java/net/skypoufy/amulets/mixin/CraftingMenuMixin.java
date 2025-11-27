@@ -41,12 +41,10 @@ public abstract class CraftingMenuMixin {
                 stacks.add(stack);
             }
 
-            AtomicBoolean hasItem = new AtomicBoolean(false);
             List<String> mods = new ArrayList<>(List.of());
 
             stacks.stream().forEach(item -> {
                 if (item.getItem() instanceof AmuletBaseItem stack) {
-                    hasItem.set(true);
                     mods.add(stack.getAllowedMod());
                 }
             });
