@@ -1,7 +1,0 @@
-{
-  "command.trust.success": "You trust %s",
-  "command.trusted.success": "You are trusted by %s",
-  "command.dare.success": "You dare %s",
-  "command.dared.success": "You are dared by %s"
-
-}

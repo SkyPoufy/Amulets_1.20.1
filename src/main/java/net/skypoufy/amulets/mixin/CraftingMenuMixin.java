@@ -23,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(CraftingMenu.class)
 public abstract class CraftingMenuMixin {
@@ -58,8 +57,8 @@ public abstract class CraftingMenuMixin {
             ResourceLocation id = recipeOpt.get().getId();
 
             if (Amulets.mods.contains(id.getNamespace()) && !mods.contains(id.getNamespace())) {
-                result.setItem(0, ItemStack.EMPTY);
 
+                result.setItem(0, ItemStack.EMPTY);
                 ci.cancel();
             }
         });

@@ -1,6 +1,8 @@
 package net.skypoufy.amulets.cca;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +19,7 @@ public class SlotItem implements ISlotItem {
 
     @Override
     public void setItem(ItemStack stack) {
-        this.stack = stack;
+        this.stack = stack.copy();
     }
 
     @Override
@@ -26,34 +28,43 @@ public class SlotItem implements ISlotItem {
     }
 
     @Override
-    public void setSlot(SimpleContainer slot) {
-        this.slot = slot;
-
+    public void setSlot(SimpleContainer container) {
+        for (int i = 0; i < slot.getContainerSize(); i++) {
+            slot.setItem(i, container.getItem(i).copy());
+        }
     }
 
     @Override
     public void copyFrom(@NotNull ISlotItem slotItem) {
-        this.stack = slotItem.getItem();
-        this.slot = slotItem.getSlot();
+        this.stack = slotItem.getItem().copy();
+        SimpleContainer slots = slotItem.getSlot();
+        for (int i = 0; i < slots.getContainerSize(); i++) {
+            this.slot.setItem(i, slots.getItem(i).copy());
+        }
     }
 
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
-        stack.save(tag);
-        tag.put("slot1", this.slot.getItem(0).save(new CompoundTag()));
-        tag.put("slot2", this.slot.getItem(1).save(new CompoundTag()));
-        tag.put("slot3", this.slot.getItem(2).save(new CompoundTag()));
-        tag.put("slot4", this.slot.getItem(3).save(new CompoundTag()));
+
+        tag.put("Item", stack.save(new CompoundTag()));
+
+        ListTag list = new ListTag();
+        for (int i = 0; i < slot.getContainerSize(); i++) {
+            list.add(slot.getItem(i).save(new CompoundTag()));
+        }
+        tag.put("Slots", list);
+
         return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
-        stack = ItemStack.of(tag);
-        this.slot.setItem(0, ItemStack.of(tag.getCompound("slot1")));
-        this.slot.setItem(1, ItemStack.of(tag.getCompound("slot2")));
-        this.slot.setItem(2, ItemStack.of(tag.getCompound("slot3")));
-        this.slot.setItem(3, ItemStack.of(tag.getCompound("slot4")));
+        this.stack = ItemStack.of(tag.getCompound("Item"));
+
+        ListTag list = tag.getList("Slots", Tag.TAG_COMPOUND);
+        for (int i = 0; i < list.size(); i++) {
+            this.slot.setItem(i, ItemStack.of(list.getCompound(i)));
+        }
     }
 }

@@ -1,7 +1,9 @@
 package net.skypoufy.amulets;
 
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -11,6 +13,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.skypoufy.amulets.cca.Slot;
 import net.skypoufy.amulets.cca.SlotAttacher;
 import net.skypoufy.amulets.commands.AmuletsCommand;
+import net.skypoufy.amulets.util.UniqueAmuletData;
 
 @Mod.EventBusSubscriber(modid = Amulets.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class AmuletsEvents {
@@ -24,9 +27,15 @@ public class AmuletsEvents {
 
     @SubscribeEvent
     public static void onPlayerCloned(PlayerEvent.Clone event) {
-        if (event.isWasDeath()) {
-            event.getOriginal().getCapability(Slot.INSTANCE).ifPresent(slotItem -> event.getOriginal().getCapability(Slot.INSTANCE).ifPresent(slotItem1 -> slotItem1.copyFrom(slotItem)));
-        }
+        if (!event.isWasDeath()) return;
+
+        event.getOriginal().reviveCaps();
+
+        event.getEntity().getCapability(Slot.INSTANCE).ifPresent(newCap ->
+                event.getOriginal().getCapability(Slot.INSTANCE).ifPresent(newCap::copyFrom)
+        );
+
+        event.getOriginal().invalidateCaps();
     }
 
     @SubscribeEvent
@@ -39,5 +48,21 @@ public class AmuletsEvents {
         AmuletsCommand.register(event.getDispatcher());
     }
 
+    @SubscribeEvent
+    public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
 
+        Player player = event.getEntity();
+        UniqueAmuletData data = UniqueAmuletData.get(player.level());
+
+        player.getCapability(Slot.INSTANCE).ifPresent(cap -> {
+
+            SimpleContainer inv = cap.getSlot();
+
+            ItemStack stored = data.getUnique(player.getUUID());
+
+            if (!stored.isEmpty()) {
+                inv.setItem(0, stored.copy());
+            }
+        });
+    }
 }
