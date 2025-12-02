@@ -1,10 +1,14 @@
 {
-  "command.trust.success": "You trust %s",
-  "command.trusted.success": "You are trusted by %s",
-  "command.dare.success": "You dare %s",
-  "command.dared.success": "You are dared by %s",
-  "command.no_amulets": "You have no unique amulet!",
-  "command.amulet_not_possessed": "That player does not have your amulet.",
-  "command.no_slots": "That player has no empty amulet slots!",
-  "command.amulet_possessed": "That player already have your amulet!"
+  "command.trust.success": "You trust %s !",
+  "command.trusted.success": "You are trusted by %s !",
+  "command.dare.success": "You dare %s !",
+  "command.dared.success": "You are dared by %s !",
+  "command.no_amulets": "You have no unique amulet !",
+  "command.amulet_not_possessed": "That player does not have your amulet !",
+  "command.no_slots": "That player has no empty amulet slots !",
+  "command.amulet_possessed": "That player already have your amulet !",
+  "command.removed_all": "Removed all amulets from %s !",
+  "command.invalid": "Invalid slot %s !",
+  "command.removed_slot": "Removed amulet from slot %s of %s",
+  "command.slot_empty": "The slot is already empty !"
 }

@@ -1,6 +1,7 @@
 package net.skypoufy.amulets.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -8,11 +9,8 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.skypoufy.amulets.cca.Slot;
-import net.skypoufy.amulets.item.AmuletBaseItem;
-import net.skypoufy.amulets.util.UniqueAmuletData;
 
 public class AmuletsCommand {
 
@@ -44,18 +42,32 @@ public class AmuletsCommand {
                                                 StringArgumentType.getString(ctx, "mod")
                                         ))
                                 ))
-                )
+                )*/
                 .then(Commands.literal("remove")
-                        .requires(src -> src.hasPermission(2))   // admin only
+                        .requires(src -> src.hasPermission(2))
                         .then(Commands.argument("target", EntityArgument.player())
-                                .then(Commands.argument("mod", StringArgumentType.string())
+
+                                // remove ALL
+                                .then(Commands.literal("all")
                                         .executes(ctx -> removeCommand(
                                                 ctx.getSource(),
                                                 EntityArgument.getPlayer(ctx, "target"),
-                                                StringArgumentType.getString(ctx, "mod")
+                                                true,   // removeAll = true
+                                                -1      // slot ignored
                                         ))
-                                ))
-                )
+                                )
+
+                                // remove specific slot
+                                .then(Commands.argument("slot", IntegerArgumentType.integer(0, 3))
+                                        .executes(ctx -> removeCommand(
+                                                ctx.getSource(),
+                                                EntityArgument.getPlayer(ctx, "target"),
+                                                false,  // removeAll = false
+                                                IntegerArgumentType.getInteger(ctx, "slot")
+                                        ))
+                                )
+                        )
+                )/*
                 .then(Commands.literal("list")
                         .requires(src -> src.hasPermission(2))
                         .then(Commands.argument("target", EntityArgument.player())
@@ -64,10 +76,12 @@ public class AmuletsCommand {
                                         EntityArgument.getPlayer(ctx, "target")
                                 ))
                         )
-                )*/
+                )
+                */
         );
     }
 
+    /*
     public static int addCommand(CommandSourceStack source, Player target, String modName) {
 
         ItemStack newUnique = new ItemStack(
@@ -91,6 +105,47 @@ public class AmuletsCommand {
         return 1;
     }
 
+     */
+
+    public static int removeCommand(CommandSourceStack source, Player target, boolean removeAll, int slot) {
+
+        target.getCapability(Slot.INSTANCE).ifPresent(cap -> {
+            SimpleContainer container = cap.getSlot();
+
+            if (removeAll) {
+                // Remove ALL
+                for (int i = 0; i < container.getContainerSize(); i++) {
+                    container.setItem(i, ItemStack.EMPTY);
+                }
+
+                source.sendSuccess(
+                        () -> Component.translatable("command.removed_all", target.getName().getString()).withStyle(ChatFormatting.GOLD),
+                        true
+                );
+                return;
+            }
+
+            // Remove specific slot
+            if (slot < 0 || slot >= container.getContainerSize()) {
+                source.sendFailure(Component.translatable("command.invalid", slot).withStyle(ChatFormatting.RED));
+                return;
+            }
+            if (container.getItem(slot).isEmpty()) {
+                source.sendFailure(Component.translatable("command.slot_empty", slot).withStyle(ChatFormatting.RED));
+            }
+
+            container.setItem(slot, ItemStack.EMPTY);
+
+            source.sendSuccess(
+                    () -> Component.translatable("command.removed_slot", slot, target.getName().getString()).withStyle(ChatFormatting.GOLD),
+                    true
+            );
+        });
+
+        return 1;
+    }
+
+    /*
     public static int removeCommand(CommandSourceStack source, Player target, String modName) {
 
         UniqueAmuletData data = UniqueAmuletData.get(target.level());
@@ -118,6 +173,8 @@ public class AmuletsCommand {
         return 1;
     }
 
+     */
+
     public static int trustCommand(CommandSourceStack source, Player trusted) {
         Player truster = source.getPlayer();
 
@@ -136,7 +193,7 @@ public class AmuletsCommand {
                 for (int i = 1; i < to.getContainerSize(); i++) {
                     ItemStack stack = to.getItem(i);
                     if (stack.is(unique.getItem())) {
-                        truster.displayClientMessage(Component.literal("command.amulet_possessed").withStyle(ChatFormatting.RED), true);
+                        truster.displayClientMessage(Component.translatable("command.amulet_possessed").withStyle(ChatFormatting.RED), true);
                         return;
                     }
                     if (stack.isEmpty()) {
@@ -191,6 +248,7 @@ public class AmuletsCommand {
         return 1;
     }
 
+    /*
     public static int listCommand(CommandSourceStack source, Player target) {
 
         return target.getCapability(Slot.INSTANCE).map(cap -> {
@@ -222,4 +280,6 @@ public class AmuletsCommand {
             return 1;
         }).orElse(0);
     }
+
+     */
 }
