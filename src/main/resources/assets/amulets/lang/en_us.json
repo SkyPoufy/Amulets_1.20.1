@@ -1,4 +1,7 @@
 {
+  "item.amulets.amulet_heart": "Amulet of the Life",
+  "item.amulets.amulet_create": "Amulet of the Creation",
+  "tabs.amulets": "Amulets",
   "command.trust.success": "You trust %s !",
   "command.trusted.success": "You are trusted by %s !",
   "command.dare.success": "You dare %s !",

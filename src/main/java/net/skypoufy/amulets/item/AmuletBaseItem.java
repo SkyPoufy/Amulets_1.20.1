@@ -11,34 +11,36 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class AmuletBaseItem extends Item {
+public abstract class AmuletBaseItem extends Item {
 
-    protected String allowedMod;
+    protected List<String> allowedMods;
 
-    public AmuletBaseItem(Properties settings, String allowedMod) {
+    public AmuletBaseItem(Properties settings) {
         super(settings);
-        this.allowedMod = allowedMod;
-        this.addModToModList();
     }
 
     public void addModToModList() {
-        if (!Amulets.mods.contains(this.allowedMod)) {
-            Amulets.mods.add(this.allowedMod);
+        for (String allowedMod : this.allowedMods) {
+            if (!Amulets.mods.contains(allowedMod)) {
+                Amulets.mods.add(allowedMod);
+            }
         }
     }
 
-    public void setAllowedMod(String allowedMod) {
-        this.allowedMod = allowedMod;
+    public void setAllowedMods(String... allowedMods) {
+        this.allowedMods = List.of(allowedMods);
         this.addModToModList();
     };
 
-    public String getAllowedMod() {
-        return this.allowedMod;
+    public List<String> getAllowedMods() {
+        return this.allowedMods;
     };
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltips, TooltipFlag flag) {
-        tooltips.add(Component.literal("Mod : " + allowedMod).withStyle(ChatFormatting.GOLD));
+        for (String allowedMod : allowedMods) {
+            tooltips.add(Component.literal("Mod : " + allowedMod).withStyle(ChatFormatting.GOLD));
+        }
         super.appendHoverText(stack, world, tooltips, flag);
     }
 

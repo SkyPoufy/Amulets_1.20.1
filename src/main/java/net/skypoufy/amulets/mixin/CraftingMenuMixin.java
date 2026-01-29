@@ -44,7 +44,7 @@ public abstract class CraftingMenuMixin {
 
             stacks.stream().forEach(item -> {
                 if (item.getItem() instanceof AmuletBaseItem stack) {
-                    mods.add(stack.getAllowedMod());
+                    mods.addAll(stack.getAllowedMods());
                 }
             });
 

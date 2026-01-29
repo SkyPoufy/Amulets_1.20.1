@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "amulets:item/amulet_create"
+    "layer0": "amulets:item/amulet_heart"
   }
 }

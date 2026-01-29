@@ -11,6 +11,8 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.skypoufy.amulets.cca.Slot;
+import net.skypoufy.amulets.item.AmuletBaseItem;
+
 
 public class AmuletsCommand {
 
@@ -32,17 +34,14 @@ public class AmuletsCommand {
                                 ))
                         )
                 )
-                /*.then(Commands.literal("add")
+                .then(Commands.literal("add")
                         .requires(src -> src.hasPermission(2))   // admin only
                         .then(Commands.argument("target", EntityArgument.player())
-                                .then(Commands.argument("mod", StringArgumentType.string())
-                                        .executes(ctx -> addCommand(
-                                                ctx.getSource(),
-                                                EntityArgument.getPlayer(ctx, "target"),
-                                                StringArgumentType.getString(ctx, "mod")
-                                        ))
+                                .executes(ctx -> addCommand(
+                                        ctx.getSource(),
+                                        EntityArgument.getPlayer(ctx, "target")
                                 ))
-                )*/
+                )
                 .then(Commands.literal("remove")
                         .requires(src -> src.hasPermission(2))
                         .then(Commands.argument("target", EntityArgument.player())
@@ -78,34 +77,34 @@ public class AmuletsCommand {
                         )
                 )
                 */
-        );
+        ));
     }
 
-    /*
-    public static int addCommand(CommandSourceStack source, Player target, String modName) {
+    public static int addCommand(CommandSourceStack source, Player target) {
 
-        ItemStack newUnique = new ItemStack(
-                new AmuletBaseItem(new Item.Properties().stacksTo(1), modName)
-        );
-
-        UniqueAmuletData data = UniqueAmuletData.get(target.level());
-        data.setUnique(target.getUUID(), newUnique);  // SAVE IT
+        ItemStack amulet = source.getPlayer().getMainHandItem();
+        if (amulet == ItemStack.EMPTY) {
+            source.sendFailure(Component.translatable("command.hand.empty").withStyle(ChatFormatting.RED));
+            return 1;
+        }
+        if (!(amulet.getItem() instanceof AmuletBaseItem)) {
+            source.sendFailure(Component.translatable("command.hand.not_amulet").withStyle(ChatFormatting.RED));
+            return 1;
+        }
 
         target.getCapability(Slot.INSTANCE).ifPresent(cap -> {
             SimpleContainer container = cap.getSlot();
 
             // overwrite slot 0
-            container.setItem(0, newUnique.copy());
+            container.setItem(0, amulet.copy());
         });
 
-        source.sendSuccess(() ->
-                Component.literal("Set unique amulet for " + target.getName().getString()
-                        + " to mod '" + modName + "'"), false);
+        source.sendSuccess(() -> Component.translatable("command.amulet.set").withStyle(ChatFormatting.GOLD), true);
 
         return 1;
     }
 
-     */
+
 
     public static int removeCommand(CommandSourceStack source, Player target, boolean removeAll, int slot) {
 
