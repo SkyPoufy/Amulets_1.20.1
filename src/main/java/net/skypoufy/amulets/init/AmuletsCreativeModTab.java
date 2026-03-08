@@ -19,6 +19,8 @@ public class AmuletsCreativeModTab {
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(AmuletsItem.AMULET_CREATE.get());
                         output.accept(AmuletsItem.AMULET_HEART.get());
+                        output.accept(AmuletsItem.AMULET_MAGIC.get());
+                        output.accept(AmuletsItem.AMULET_PLANE.get());
                     })
                     .build());
 

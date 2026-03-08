@@ -9,16 +9,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class AmuletCreateItem extends AmuletBaseItem {
+public class AmuletMagicItem extends AmuletBaseItem {
 
-    public AmuletCreateItem(Properties settings) {
+    public AmuletMagicItem(Properties settings) {
         super(settings);
-        this.setAllowedMods("create", "railways");
+        this.setAllowedMods("irons_spellbooks");
     }
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltips, TooltipFlag flag) {
         super.appendHoverText(stack, world, tooltips, flag);
-        tooltips.add(Component.literal("For those who want to be creative").withStyle(ChatFormatting.GREEN));
+        tooltips.add(Component.literal("For those who want to get into occulte forces").withStyle(ChatFormatting.GREEN));
     }
 }

@@ -13,7 +13,7 @@ public class AmuletHeartItem extends AmuletBaseItem {
 
     public AmuletHeartItem(Properties settings) {
         super(settings);
-        this.setAllowedMods("heart");
+        this.setAllowedMods("zryaks_craftable_hearts");
     }
 
     @Override

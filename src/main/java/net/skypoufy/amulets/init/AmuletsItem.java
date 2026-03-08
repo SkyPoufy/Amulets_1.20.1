@@ -8,6 +8,8 @@ import net.minecraftforge.registries.RegistryObject;
 import net.skypoufy.amulets.Amulets;
 import net.skypoufy.amulets.item.AmuletCreateItem;
 import net.skypoufy.amulets.item.AmuletHeartItem;
+import net.skypoufy.amulets.item.AmuletMagicItem;
+import net.skypoufy.amulets.item.AmuletPlaneItem;
 
 import java.util.function.Supplier;
 
@@ -17,6 +19,8 @@ public class AmuletsItem {
 
     public static final RegistryObject<Item> AMULET_CREATE = create("amulet_create", () -> new AmuletCreateItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> AMULET_HEART = create("amulet_heart", () -> new AmuletHeartItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> AMULET_MAGIC = create("amulet_magic", () -> new AmuletMagicItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> AMULET_PLANE = create("amulet_plane", () -> new AmuletPlaneItem(new Item.Properties().stacksTo(1)));
 
     public static <T extends Item> RegistryObject<T> create(String name, Supplier<T> item) {
         return AMULETS_ITEM.register(name, item);
