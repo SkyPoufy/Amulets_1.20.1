@@ -10,7 +10,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.skypoufy.amulets.cca.Slot;
+import net.skypoufy.amulets.cca.AmuletEntityComponents;
+import net.skypoufy.amulets.cca.SlotItem;
 import net.skypoufy.amulets.item.AmuletBaseItem;
 
 
@@ -92,12 +93,12 @@ public class AmuletsCommand {
             return 1;
         }
 
-        target.getCapability(Slot.INSTANCE).ifPresent(cap -> {
-            SimpleContainer container = cap.getSlot();
+        SlotItem cap = AmuletEntityComponents.SLOT.get(target);
 
-            // overwrite slot 0
-            container.setItem(0, amulet.copy());
-        });
+        SimpleContainer container = cap.getSlot();
+
+        // overwrite slot 0
+        container.setItem(0, amulet.copy());
 
         source.sendSuccess(() -> Component.translatable("command.amulet.set").withStyle(ChatFormatting.GOLD), true);
 
@@ -108,38 +109,38 @@ public class AmuletsCommand {
 
     public static int removeCommand(CommandSourceStack source, Player target, boolean removeAll, int slot) {
 
-        target.getCapability(Slot.INSTANCE).ifPresent(cap -> {
-            SimpleContainer container = cap.getSlot();
+        SlotItem cap = AmuletEntityComponents.SLOT.get(target);
 
-            if (removeAll) {
-                // Remove ALL
-                for (int i = 0; i < container.getContainerSize(); i++) {
-                    container.setItem(i, ItemStack.EMPTY);
-                }
+        SimpleContainer container = cap.getSlot();
 
-                source.sendSuccess(
-                        () -> Component.translatable("command.removed_all", target.getName().getString()).withStyle(ChatFormatting.GOLD),
-                        true
-                );
-                return;
+        if (removeAll) {
+            // Remove ALL
+            for (int i = 0; i < container.getContainerSize(); i++) {
+                container.setItem(i, ItemStack.EMPTY);
             }
-
-            // Remove specific slot
-            if (slot < 0 || slot >= container.getContainerSize()) {
-                source.sendFailure(Component.translatable("command.invalid", slot).withStyle(ChatFormatting.RED));
-                return;
-            }
-            if (container.getItem(slot).isEmpty()) {
-                source.sendFailure(Component.translatable("command.slot_empty", slot).withStyle(ChatFormatting.RED));
-            }
-
-            container.setItem(slot, ItemStack.EMPTY);
 
             source.sendSuccess(
-                    () -> Component.translatable("command.removed_slot", slot, target.getName().getString()).withStyle(ChatFormatting.GOLD),
+                    () -> Component.translatable("command.removed_all", target.getName().getString()).withStyle(ChatFormatting.GOLD),
                     true
             );
-        });
+        }
+
+        // Remove specific slot
+        if (slot < 0 || slot >= container.getContainerSize()) {
+            source.sendFailure(Component.translatable("command.invalid", slot).withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        if (container.getItem(slot).isEmpty()) {
+            source.sendFailure(Component.translatable("command.slot_empty", slot).withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        container.setItem(slot, ItemStack.EMPTY);
+
+        source.sendSuccess(
+                () -> Component.translatable("command.removed_slot", slot, target.getName().getString()).withStyle(ChatFormatting.GOLD),
+                true
+        );
 
         return 1;
     }
@@ -176,56 +177,54 @@ public class AmuletsCommand {
 
     public static int trustCommand(CommandSourceStack source, Player trusted) {
         Player truster = source.getPlayer();
+        SlotItem trusterCap = AmuletEntityComponents.SLOT.get(truster);
+        SlotItem trustedCap = AmuletEntityComponents.SLOT.get(trusted);
 
-        truster.getCapability(Slot.INSTANCE).ifPresent(trusterCap -> {
-            SimpleContainer from = trusterCap.getSlot();
-            ItemStack unique = from.getItem(0);
+        SimpleContainer from = trusterCap.getSlot();
+        ItemStack unique = from.getItem(0);
 
-            if (unique.isEmpty()) {
-                truster.displayClientMessage(Component.translatable("command.no_amulets").withStyle(ChatFormatting.RED), true);
-                return;
+        if (unique.isEmpty()) {
+            truster.displayClientMessage(Component.translatable("command.no_amulets").withStyle(ChatFormatting.RED), true);
+            return 0;
+        }
+
+        SimpleContainer to = trustedCap.getSlot();
+
+        for (int i = 1; i < to.getContainerSize(); i++) {
+            ItemStack stack = to.getItem(i);
+            if (stack.is(unique.getItem())) {
+                truster.displayClientMessage(Component.translatable("command.amulet_possessed").withStyle(ChatFormatting.RED), true);
+
             }
+            if (stack.isEmpty()) {
+                to.setItem(i, unique.copy());
 
-            trusted.getCapability(Slot.INSTANCE).ifPresent(trustedCap -> {
-                SimpleContainer to = trustedCap.getSlot();
+                truster.displayClientMessage(
+                        Component.translatable("command.trust.success", trusted.getName()).withStyle(ChatFormatting.GOLD), true);
+                trusted.displayClientMessage(
+                        Component.translatable("command.trusted.success", truster.getName()).withStyle(ChatFormatting.GOLD), true);
 
-                for (int i = 1; i < to.getContainerSize(); i++) {
-                    ItemStack stack = to.getItem(i);
-                    if (stack.is(unique.getItem())) {
-                        truster.displayClientMessage(Component.translatable("command.amulet_possessed").withStyle(ChatFormatting.RED), true);
-                        return;
-                    }
-                    if (stack.isEmpty()) {
-                        to.setItem(i, unique.copy());
+            }
+        }
 
-                        truster.displayClientMessage(
-                                Component.translatable("command.trust.success", trusted.getName()).withStyle(ChatFormatting.GOLD), true);
-                        trusted.displayClientMessage(
-                                Component.translatable("command.trusted.success", truster.getName()).withStyle(ChatFormatting.GOLD), true);
-                        return;
-                    }
-                }
-
-                truster.displayClientMessage(Component.literal("command.no_slots").withStyle(ChatFormatting.RED), true);
-            });
-        });
+        truster.displayClientMessage(Component.literal("command.no_slots").withStyle(ChatFormatting.RED), true);
 
         return 1;
     }
 
     public static int dareCommand(CommandSourceStack source, Player dared) {
         Player darer = source.getPlayer();
+        SlotItem darerCap = AmuletEntityComponents.SLOT.get(darer);
+        SlotItem daredCap = AmuletEntityComponents.SLOT.get(dared);
 
-        darer.getCapability(Slot.INSTANCE).ifPresent(darerCap -> {
             SimpleContainer from = darerCap.getSlot();
             ItemStack unique = from.getItem(0);
 
             if (unique.isEmpty()) {
                 darer.displayClientMessage(Component.translatable("command.no_amulets").withStyle(ChatFormatting.RED), true);
-                return;
+
             }
 
-            dared.getCapability(Slot.INSTANCE).ifPresent(daredCap -> {
                 SimpleContainer to = daredCap.getSlot();
 
                 for (int i = 1; i < to.getContainerSize(); i++) {
@@ -236,13 +235,10 @@ public class AmuletsCommand {
                                 Component.translatable("command.dare.success", dared.getName()).withStyle(ChatFormatting.GOLD), true);
                         dared.displayClientMessage(
                                 Component.translatable("command.dared.success", darer.getName()).withStyle(ChatFormatting.GOLD), true);
-                        return;
                     }
                 }
 
                 darer.displayClientMessage(Component.translatable("command.amulet_not_possessed").withStyle(ChatFormatting.RED), true);
-            });
-        });
 
         return 1;
     }

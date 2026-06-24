@@ -1,33 +1,28 @@
 package net.skypoufy.amulets.cca;
 
+import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class SlotItem implements ISlotItem {
+public class SlotItem implements AutoSyncedComponent {
 
-    private ItemStack stack = ItemStack.EMPTY;
-    private SimpleContainer slot = new SimpleContainer(4);
+    private final Player player;
+    private final SimpleContainer slot;
 
-    @Override
-    public ItemStack getItem() {
-        return this.stack;
+    public SlotItem(Player player) {
+        slot = new SimpleContainer(4);
+        this.player = player;
     }
 
-    @Override
-    public void setItem(ItemStack stack) {
-        this.stack = stack.copy();
-    }
-
-    @Override
     public SimpleContainer getSlot() {
         return this.slot;
     }
 
-    @Override
     public void setSlot(SimpleContainer container) {
         for (int i = 0; i < slot.getContainerSize(); i++) {
             slot.setItem(i, container.getItem(i).copy());
@@ -35,33 +30,16 @@ public class SlotItem implements ISlotItem {
     }
 
     @Override
-    public void copyFrom(@NotNull ISlotItem slotItem) {
-        this.stack = slotItem.getItem().copy();
-        SimpleContainer slots = slotItem.getSlot();
-        for (int i = 0; i < slots.getContainerSize(); i++) {
-            this.slot.setItem(i, slots.getItem(i).copy());
-        }
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-
-        tag.put("Item", stack.save(new CompoundTag()));
-
+    public void writeToNbt(CompoundTag tag) {
         ListTag list = new ListTag();
         for (int i = 0; i < slot.getContainerSize(); i++) {
             list.add(slot.getItem(i).save(new CompoundTag()));
         }
         tag.put("Slots", list);
-
-        return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag tag) {
-        this.stack = ItemStack.of(tag.getCompound("Item"));
-
+    public void readFromNbt(CompoundTag tag) {
         ListTag list = tag.getList("Slots", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             this.slot.setItem(i, ItemStack.of(list.getCompound(i)));

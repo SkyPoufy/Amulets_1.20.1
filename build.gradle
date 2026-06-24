@@ -142,6 +142,9 @@ dependencies {
         jarJar.ranged(it, "[0.4.1,)")
     }
 
+    implementation fg.deobf("dev.onyxstudios.cca:cca_base:${cca_version}") {transitive = false}
+    implementation fg.deobf("dev.onyxstudios.cca:cca_entity:${cca_version}") {transitive = false}
+
 
     implementation(fg.deobf("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false })
     implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}"))
@@ -184,6 +187,7 @@ tasks.named('processResources', ProcessResources).configure {
             loader_version_range: loader_version_range,
             mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
             mod_authors: mod_authors, mod_description: mod_description,
+            cca_version: cca_version
     ]
     inputs.properties replaceProperties
 

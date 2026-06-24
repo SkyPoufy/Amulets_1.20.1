@@ -1,6 +1,7 @@
 package net.skypoufy.amulets;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -25,6 +26,10 @@ public class Amulets
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static List<String> mods = new ArrayList<>();
+
+    public static ResourceLocation id(String id) {
+        return new ResourceLocation(MOD_ID, id);
+    }
 
     public Amulets()
     {
